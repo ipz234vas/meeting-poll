@@ -1,0 +1,165 @@
+/* BestWindows.module.css */
+
+.container {
+    margin-top: 28px;
+}
+
+.heading {
+    margin: 0 0 14px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #202124;
+    letter-spacing: -0.2px;
+}
+
+.empty {
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 10px;
+    color: #80868b;
+    font-size: 14px;
+}
+
+/* ─── Window list ─────────────────────────────────────────────────────────── */
+.windowList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.window {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 12px;
+    align-items: flex-start;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.15s;
+}
+
+.window:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Best window (#1) gets a green left accent */
+.windowBest {
+    border-color: #34a853;
+    border-left: 4px solid #34a853;
+    background: #f0faf3;
+}
+
+/* ─── Rank badge ──────────────────────────────────────────────────────────── */
+.rank {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #f1f3f4;
+    font-size: 13px;
+    font-weight: 700;
+    color: #5f6368;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.rankBest {
+    background: #34a853;
+    color: #fff;
+}
+
+/* ─── Content ─────────────────────────────────────────────────────────────── */
+.windowContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.windowTime {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.dateText {
+    font-size: 14px;
+    font-weight: 600;
+    color: #202124;
+}
+
+.timeRange {
+    font-size: 20px;
+    font-weight: 700;
+    color: #202124;
+    letter-spacing: -0.3px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ─── Stats row ───────────────────────────────────────────────────────────── */
+.stats {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.statLabel {
+    font-size: 11px;
+    color: #80868b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.statValue {
+    font-size: 13px;
+    font-weight: 500;
+    color: #202124;
+}
+
+/* ─── Participation bar ───────────────────────────────────────────────────── */
+.barWrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.barTrack {
+    flex: 1;
+    max-width: 160px;
+    height: 6px;
+    background: #e8eaed;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.barFill {
+    height: 100%;
+    border-radius: 3px;
+    background: #34a853;
+    transition: width 0.3s ease;
+}
+
+.barLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: #3c4043;
+    white-space: nowrap;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .timeRange { font-size: 17px; }
+    .stats { gap: 10px; }
+}

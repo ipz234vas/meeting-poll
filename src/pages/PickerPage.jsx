@@ -1,51 +1,133 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useConfig } from "../lib/useConfig";
 import TimeGrid from "../components/TimeGrid";
 import GoogleFormSubmitFetch from "../components/GoogleFormSubmitFetch.jsx";
+import styles from "./PickerPage.module.css";
 
 export default function PickerPage() {
     const { loading, error, meta, days } = useConfig();
+    const navigate = useNavigate();
 
-    const [mode, setMode] = useState("g"); // "g" | "y" | "e"
-    const [name, setName] = useState("");
-    const [availability, setAvailability] = useState({}); // { [date]: { [HH:MM]: "g"|"y" } }
+    const [mode, setMode]                 = useState("g");
+    const [name, setName]                 = useState("");
+    const [availability, setAvailability] = useState({});
+    const [submitted, setSubmitted]       = useState(false);
 
     const slotMinutes = useMemo(() => Number(meta?.slotMinutes ?? 30) || 30, [meta]);
 
-    if (loading) return <p style={{ padding: 16 }}>Loading…</p>;
-    if (error) return <p style={{ padding: 16, color: "crimson" }}>Error: {error}</p>;
+    if (loading) return <p style={{ padding: 16 }}>Завантаження…</p>;
+    if (error)   return <p style={{ padding: 16, color: "crimson" }}>Помилка: {error}</p>;
+
+    const modeName = mode === "g" ? "Підходить" : mode === "y" ? "Можливо" : "Стерти";
+
+    function handleSuccess() {
+        setSubmitted(true);
+    }
+
+    function handleEdit() {
+        setSubmitted(false);
+    }
 
     return (
-        <div style={{ padding: 16 }}>
-            <h1 style={{ marginTop: 0 }}>{meta?.title ?? "Meeting poll"}</h1>
+        <div className={styles.page}>
+            <h1 className={styles.title}>{meta?.title ?? "Вибір зручного часу"}</h1>
 
-            <div style={styles.topBar}>
-                <label style={styles.label}>
-                    Name:
-                    <input
-                        style={styles.input}
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="ira.vaskovska"
-                    />
-                </label>
+            {/* ── Success banner ───────────────────────────────────────────── */}
+            {submitted && (
+                <div className={styles.successBanner}>
+                    <div className={styles.successTop}>
+                        <span className={styles.successIcon}>✅</span>
+                        <div>
+                            <div className={styles.successTitle}>Відповідь надіслано!</div>
+                            <div className={styles.successSub}>
+                                Дякуємо, <strong>{name}</strong>. Ваш вибір збережено нижче.
+                            </div>
+                        </div>
+                    </div>
 
-                <div style={styles.modes}>
-                    <ModeButton active={mode === "g"} onClick={() => setMode("g")}>
-                        🟩 Free
-                    </ModeButton>
-                    <ModeButton active={mode === "y"} onClick={() => setMode("y")}>
-                        🟨 Maybe
-                    </ModeButton>
-                    <ModeButton active={mode === "e"} onClick={() => setMode("e")}>
-                        🧽 Erase
-                    </ModeButton>
+                    <div className={styles.successActions}>
+                        <button className={styles.btnResults} onClick={() => navigate("/results")}>
+                            Переглянути результати →
+                        </button>
+                        <button className={styles.btnEdit} onClick={handleEdit}>
+                            ✏️ Змінити відповідь
+                        </button>
+                    </div>
+
+                    <p className={styles.delayNote}>
+                        💬 Результати можуть оновлюватися з невеликою затримкою (~30 секунд).
+                    </p>
                 </div>
+            )}
 
-                <div style={styles.modeHint}>
-                    Mode: <b>{mode === "g" ? "Free" : mode === "y" ? "Maybe" : "Erase"}</b>
-                </div>
-            </div>
+            {/* ── Top bar (hidden after submit) ────────────────────────────── */}
+            {!submitted && (
+                <>
+                    <div className={styles.topBar}>
+                        <div className={styles.nameGroup}>
+                            <label className={styles.label} htmlFor="participant-name">
+                                Ваше ім'я
+                            </label>
+                            <input
+                                id="participant-name"
+                                className={styles.input}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Іваненко Іван"
+                                autoComplete="off"
+                            />
+                            <span className={styles.nameHint}>
+                                Прізвище + Ім'я або унікальний нікнейм
+                            </span>
+                        </div>
+
+                        <div className={styles.modes}>
+                            <ModeButton active={mode === "g"} onClick={() => setMode("g")}>
+                                🟩 Підходить
+                            </ModeButton>
+                            <ModeButton active={mode === "y"} onClick={() => setMode("y")}>
+                                🟨 Можливо
+                            </ModeButton>
+                            <ModeButton active={mode === "e"} onClick={() => setMode("e")}>
+                                🧽 Стерти
+                            </ModeButton>
+                        </div>
+
+                        <div className={styles.modeHint}>
+                            Режим: <b>{modeName}</b>
+                        </div>
+                    </div>
+
+                    {/* Nick uniqueness callout */}
+                    <div className={styles.nickCallout}>
+                        <span className={styles.nickCalloutIcon}>🔑</span>
+                        <div>
+                            <strong>Нікнейм = ваш ключ.</strong>{" "}
+                            Якщо захочете змінити відповідь пізніше — просто введіть
+                            той самий нікнейм і надішліть знову. Нова відповідь
+                            автоматично замінить попередню.
+                        </div>
+                    </div>
+
+                    {/* Legend */}
+                    <div className={styles.legend}>
+                        <span className={styles.legendItem}>
+                            <span className={`${styles.legendSwatch} ${styles.swatchGreen}`} />
+                            Підходить — зручний час
+                        </span>
+                        <span className={styles.legendItem}>
+                            <span className={`${styles.legendSwatch} ${styles.swatchYellow}`} />
+                            Можливо — може підійти
+                        </span>
+                    </div>
+
+                    <p className={styles.shiftHint}>
+                        💡 Затисніть ліву кнопку миші та тягніть, щоб позначити кілька клітинок.
+                        Або утримуйте <kbd>Shift</kbd> і клікніть на другу клітинку — заповниться весь діапазон одразу.
+                    </p>
+                </>
+            )}
 
             <TimeGrid
                 days={days}
@@ -53,9 +135,17 @@ export default function PickerPage() {
                 value={availability}
                 onChange={setAvailability}
                 mode={mode}
+                readOnly={submitted}
             />
 
-            <GoogleFormSubmitFetch name={name} availability={availability} slotMinutes={slotMinutes}/>
+            {!submitted && (
+                <GoogleFormSubmitFetch
+                    name={name}
+                    availability={availability}
+                    slotMinutes={slotMinutes}
+                    onSuccess={handleSuccess}
+                />
+            )}
         </div>
     );
 }
@@ -65,54 +155,9 @@ function ModeButton({ active, onClick, children }) {
         <button
             type="button"
             onClick={onClick}
-            style={{
-                ...styles.btn,
-                ...(active ? styles.btnActive : {}),
-            }}
+            className={`${styles.btn} ${active ? styles.btnActive : ""}`}
         >
             {children}
         </button>
     );
 }
-
-const styles = {
-    topBar: {
-        display: "flex",
-        gap: 12,
-        alignItems: "center",
-        flexWrap: "wrap",
-        marginBottom: 12,
-    },
-    label: { display: "flex", gap: 8, alignItems: "center" },
-    input: {
-        height: 34,
-        padding: "0 10px",
-        borderRadius: 10,
-        border: "1px solid #2a2a2a",
-        background: "#0f0f0f",
-        color: "#eaeaea",
-        outline: "none",
-    },
-    modes: { display: "flex", gap: 8 },
-    btn: {
-        height: 34,
-        padding: "0 10px",
-        borderRadius: 10,
-        border: "1px solid #2a2a2a",
-        background: "#121212",
-        color: "#eaeaea",
-        cursor: "pointer",
-    },
-    btnActive: {
-        borderColor: "#666",
-        background: "#1a1a1a",
-    },
-    modeHint: { opacity: 0.9 },
-    pre: {
-        background: "#111",
-        color: "#ddd",
-        padding: 12,
-        borderRadius: 10,
-        overflow: "auto",
-    },
-};
