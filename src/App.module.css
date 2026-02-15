@@ -34,6 +34,13 @@
     min-width: 0;
 }
 
+.navTagline {
+    font-size: 12px;
+    color: #9aa0a6;
+    font-weight: 400;
+    margin-left: 4px;
+}
+
 /* Thin vertical separator between brand and links */
 .navSep {
     width: 1px;

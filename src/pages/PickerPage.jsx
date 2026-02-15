@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useConfig } from "../lib/useConfig";
+import { useNavigate, useParams } from "react-router-dom";
+import { usePoll } from "../lib/usePoll";
 import TimeGrid from "../components/TimeGrid";
 import GoogleFormSubmitFetch from "../components/GoogleFormSubmitFetch.jsx";
 import styles from "./PickerPage.module.css";
 
 export default function PickerPage() {
-    const { loading, error, meta, days } = useConfig();
+    const { guid } = useParams();
+    const { loading, error, meta, days } = usePoll(guid);
     const navigate = useNavigate();
 
     const [mode, setMode]                 = useState("g");
@@ -20,14 +21,6 @@ export default function PickerPage() {
     if (error)   return <p style={{ padding: 16, color: "crimson" }}>Помилка: {error}</p>;
 
     const modeName = mode === "g" ? "Підходить" : mode === "y" ? "Можливо" : "Стерти";
-
-    function handleSuccess() {
-        setSubmitted(true);
-    }
-
-    function handleEdit() {
-        setSubmitted(false);
-    }
 
     return (
         <div className={styles.page}>
@@ -47,21 +40,24 @@ export default function PickerPage() {
                     </div>
 
                     <div className={styles.successActions}>
-                        <button className={styles.btnResults} onClick={() => navigate("/results")}>
+                        <button
+                            className={styles.btnResults}
+                            onClick={() => navigate(`/poll/${guid}/results`)}
+                        >
                             Переглянути результати →
                         </button>
-                        <button className={styles.btnEdit} onClick={handleEdit}>
+                        <button className={styles.btnEdit} onClick={() => setSubmitted(false)}>
                             ✏️ Змінити відповідь
                         </button>
                     </div>
 
                     <p className={styles.delayNote}>
-                        💬 Результати можуть оновлюватися з невеликою затримкою (~30 секунд).
+                        💬 Результати оновлюються з невеликою затримкою (~1 хв).
                     </p>
                 </div>
             )}
 
-            {/* ── Top bar (hidden after submit) ────────────────────────────── */}
+            {/* ── Top bar ──────────────────────────────────────────────────── */}
             {!submitted && (
                 <>
                     <div className={styles.topBar}>
@@ -83,23 +79,14 @@ export default function PickerPage() {
                         </div>
 
                         <div className={styles.modes}>
-                            <ModeButton active={mode === "g"} onClick={() => setMode("g")}>
-                                🟩 Підходить
-                            </ModeButton>
-                            <ModeButton active={mode === "y"} onClick={() => setMode("y")}>
-                                🟨 Можливо
-                            </ModeButton>
-                            <ModeButton active={mode === "e"} onClick={() => setMode("e")}>
-                                🧽 Стерти
-                            </ModeButton>
+                            <ModeButton active={mode === "g"} onClick={() => setMode("g")}>🟩 Підходить</ModeButton>
+                            <ModeButton active={mode === "y"} onClick={() => setMode("y")}>🟨 Можливо</ModeButton>
+                            <ModeButton active={mode === "e"} onClick={() => setMode("e")}>🧽 Стерти</ModeButton>
                         </div>
 
-                        <div className={styles.modeHint}>
-                            Режим: <b>{modeName}</b>
-                        </div>
+                        <div className={styles.modeHint}>Режим: <b>{modeName}</b></div>
                     </div>
 
-                    {/* Nick uniqueness callout */}
                     <div className={styles.nickCallout}>
                         <span className={styles.nickCalloutIcon}>🔑</span>
                         <div>
@@ -110,7 +97,6 @@ export default function PickerPage() {
                         </div>
                     </div>
 
-                    {/* Legend */}
                     <div className={styles.legend}>
                         <span className={styles.legendItem}>
                             <span className={`${styles.legendSwatch} ${styles.swatchGreen}`} />
@@ -143,7 +129,8 @@ export default function PickerPage() {
                     name={name}
                     availability={availability}
                     slotMinutes={slotMinutes}
-                    onSuccess={handleSuccess}
+                    pollId={guid}
+                    onSuccess={() => setSubmitted(true)}
                 />
             )}
         </div>
